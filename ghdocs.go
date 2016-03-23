@@ -11,11 +11,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-// repos, _, err := client.Repositories.List("", nil)
-// if _, ok := err.(*github.RateLimitError); ok {
-// 	log.Println("hit rate limit")
-// }
-
 var (
 	personalAccessToken string
 	issuesCollection    allIssues
@@ -26,6 +21,7 @@ type TokenSource struct {
 	AccessToken string
 }
 
+// Token authenticates via oauth
 func (t *TokenSource) Token() (*oauth2.Token, error) {
 	token := &oauth2.Token{
 		AccessToken: t.AccessToken,
@@ -34,12 +30,12 @@ func (t *TokenSource) Token() (*oauth2.Token, error) {
 }
 
 type allIssues struct {
-	issues                                                                              github.IssuesSearchResult
-	users                                                                               []github.User
-	issues_new_public, issues_2m_public, issues_6m_public, issues_1y_public             []github.Issue
-	issues_new_orgmember, issues_2m_orgmember, issues_6m_orgmember, issues_1y_orgmember []github.Issue
-	pr_new_public, pr_2m_public, pr_6m_public, pr_1y_public                             []github.Issue
-	pr_new_orgmember, pr_2m_orgmember, pr_6m_orgmember, pr_1y_orgmember                 []github.Issue
+	issues                                                                      github.IssuesSearchResult
+	users                                                                       []github.User
+	issuesnewPublic, issues2mPublic, issues6mPublic, issues1yPublic             []github.Issue
+	issuesnewOrgMember, issues2mOrgMember, issues6mOrgMember, issues1yOrgMember []github.Issue
+	prnewPublic, pr2mPublic, pr6mPublic, pr1yPublic                             []github.Issue
+	prnewOrgMember, pr2mOrgMember, pr6mOrgMember, pr1yOrgMember                 []github.Issue
 }
 
 func main() {
@@ -79,24 +75,24 @@ func main() {
 		if issue.PullRequestLinks == nil {
 			totalIssues++
 			if issue.UpdatedAt.After(twoMonthsAgo) {
-				populateIssueGroup(&issuesCollection.issues_new_orgmember, &issuesCollection.issues_new_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.issuesnewOrgMember, &issuesCollection.issuesnewPublic, issue.User, issue)
 			} else if issue.UpdatedAt.After(sixMonthsAgo) {
-				populateIssueGroup(&issuesCollection.issues_2m_orgmember, &issuesCollection.issues_2m_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.issues2mOrgMember, &issuesCollection.issues2mPublic, issue.User, issue)
 			} else if issue.UpdatedAt.After(oneYearAgo) {
-				populateIssueGroup(&issuesCollection.issues_6m_orgmember, &issuesCollection.issues_6m_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.issues6mOrgMember, &issuesCollection.issues6mPublic, issue.User, issue)
 			} else {
-				populateIssueGroup(&issuesCollection.issues_1y_orgmember, &issuesCollection.issues_1y_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.issues1yOrgMember, &issuesCollection.issues1yPublic, issue.User, issue)
 			}
 		} else {
 			totalPR++
 			if issue.UpdatedAt.After(twoMonthsAgo) {
-				populateIssueGroup(&issuesCollection.pr_new_orgmember, &issuesCollection.pr_new_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.prnewOrgMember, &issuesCollection.prnewPublic, issue.User, issue)
 			} else if issue.UpdatedAt.After(sixMonthsAgo) {
-				populateIssueGroup(&issuesCollection.pr_2m_orgmember, &issuesCollection.pr_2m_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.pr2mOrgMember, &issuesCollection.pr2mPublic, issue.User, issue)
 			} else if issue.UpdatedAt.After(oneYearAgo) {
-				populateIssueGroup(&issuesCollection.pr_6m_orgmember, &issuesCollection.pr_6m_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.pr6mOrgMember, &issuesCollection.pr6mPublic, issue.User, issue)
 			} else {
-				populateIssueGroup(&issuesCollection.pr_1y_orgmember, &issuesCollection.pr_1y_public, issue.User, issue)
+				populateIssueGroup(&issuesCollection.pr1yOrgMember, &issuesCollection.pr1yPublic, issue.User, issue)
 			}
 		}
 	}
@@ -104,27 +100,27 @@ func main() {
 	fmt.Printf("\nSummary\n")
 	fmt.Printf("\n\nPull Requests - %d\n", totalPR)
 	fmt.Printf("\n  Employee Pull Requests")
-	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d", len(issuesCollection.pr_new_orgmember), len(issuesCollection.pr_2m_orgmember), len(issuesCollection.pr_6m_orgmember), len(issuesCollection.pr_1y_orgmember))
+	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d", len(issuesCollection.prnewOrgMember), len(issuesCollection.pr2mOrgMember), len(issuesCollection.pr6mOrgMember), len(issuesCollection.pr1yOrgMember))
 	fmt.Printf("\n\n  Public Pull Requests")
-	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d\n", len(issuesCollection.pr_new_public), len(issuesCollection.pr_2m_public), len(issuesCollection.pr_6m_public), len(issuesCollection.pr_1y_public))
+	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d\n", len(issuesCollection.prnewPublic), len(issuesCollection.pr2mPublic), len(issuesCollection.pr6mPublic), len(issuesCollection.pr1yPublic))
 
 	fmt.Printf("\nIssues - %d\n", totalIssues)
 	fmt.Printf("\n  Employee Issues")
-	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d", len(issuesCollection.issues_new_orgmember), len(issuesCollection.issues_2m_orgmember), len(issuesCollection.issues_6m_orgmember), len(issuesCollection.issues_1y_orgmember))
+	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d", len(issuesCollection.issuesnewOrgMember), len(issuesCollection.issues2mOrgMember), len(issuesCollection.issues6mOrgMember), len(issuesCollection.issues1yOrgMember))
 	fmt.Printf("\n\n  Public Issues")
-	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d\n", len(issuesCollection.issues_new_public), len(issuesCollection.issues_2m_public), len(issuesCollection.issues_6m_public), len(issuesCollection.issues_1y_public))
+	fmt.Printf("\n    New: \t\t%d\n    2-6 months old:\t%d\n    6-12 months old:\t%d\n    Older that 1 year:\t%d\n", len(issuesCollection.issuesnewPublic), len(issuesCollection.issues2mPublic), len(issuesCollection.issues6mPublic), len(issuesCollection.issues1yPublic))
 
 	fmt.Printf("\nPublic Details - Pull Requests\n")
-	printIssues(issuesCollection.pr_1y_public, "1+ year old pull requests")
-	printIssues(issuesCollection.pr_6m_public, "6-12 month old pull requests")
-	printIssues(issuesCollection.pr_2m_public, "2-6 month old pull requests")
-	printIssues(issuesCollection.pr_new_public, "New Pull Requests")
+	printIssues(issuesCollection.pr1yPublic, "1+ year old pull requests")
+	printIssues(issuesCollection.pr6mPublic, "6-12 month old pull requests")
+	printIssues(issuesCollection.pr2mPublic, "2-6 month old pull requests")
+	printIssues(issuesCollection.prnewPublic, "New Pull Requests")
 
 	fmt.Printf("\n\nPublic Details - Issues\n")
-	printIssues(issuesCollection.issues_1y_public, "1+ year old issues")
-	printIssues(issuesCollection.issues_6m_public, "6-12 month old issues")
-	printIssues(issuesCollection.issues_2m_public, "2-6 month old issues")
-	printIssues(issuesCollection.issues_new_public, "New Issues")
+	printIssues(issuesCollection.issues1yPublic, "1+ year old issues")
+	printIssues(issuesCollection.issues6mPublic, "6-12 month old issues")
+	printIssues(issuesCollection.issues2mPublic, "2-6 month old issues")
+	printIssues(issuesCollection.issuesnewPublic, "New Issues")
 	fmt.Printf("(** indicates that issue or pr is older than 2 days with no comments. ## indicates that issue or pr has no comments in 4 weeks)\n\n")
 }
 
@@ -144,13 +140,13 @@ func printIssues(issues []github.Issue, title string) {
 	fmt.Printf("\n")
 }
 
-func attentionStatus(issue github.Issue) (attention_status string) {
-	attention_status = ""
+func attentionStatus(issue github.Issue) (attentionStatus string) {
+	attentionStatus = ""
 	if *issue.Comments == 0 && issue.CreatedAt.Before(time.Now().Add(time.Hour*24*2*-1)) {
-		attention_status = "**"
+		attentionStatus = "**"
 	}
 	if issue.UpdatedAt.Before(time.Now().Add(time.Hour * 24 * 30 * -1)) {
-		attention_status += "##"
+		attentionStatus += "##"
 	}
 
 	return
