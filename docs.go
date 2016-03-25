@@ -45,13 +45,24 @@ func main() {
 	oauthClient := oauth2.NewClient(oauth2.NoContext, tokenSource)
 	client := github.NewClient(oauthClient) // authenticated to GitHub here
 
-	orgs, _, err := client.Organizations.List("", nil)
-	if err != nil {
-		log.Println(err)
-		log.Fatal("Issue retrieving organization list.")
+	opt := &github.RepositoryListByOrgOptions{
+		ListOptions: github.ListOptions{PerPage: 10},
 	}
-	for _, org := range orgs {
-		fmt.Println(*org.Login)
+	// get all pages of results
+	var allRepos []github.Repository
+	for {
+		repos, resp, err := client.Repositories.ListByOrg(org, opt)
+		if err != nil {
+			log.Fatal(err)
+		}
+		allRepos = append(allRepos, repos...)
+		if resp.NextPage == 0 {
+			break
+		}
+		opt.ListOptions.Page = resp.NextPage
 	}
 
+	for _, repo := range allRepos {
+		fmt.Println(*repo.FullName)
+	}
 }
