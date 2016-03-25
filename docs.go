@@ -23,6 +23,11 @@ type TokenSource struct {
 	AccessToken string
 }
 
+// RepositoryContentGetOptions represents an optional ref parameter
+type RepositoryContentGetOptions struct {
+	Ref string `url:"ref,omitempty"`
+}
+
 // Token authenticates via oauth
 func (t *TokenSource) Token() (*oauth2.Token, error) {
 	token := &oauth2.Token{
@@ -68,7 +73,12 @@ func main() {
 	for _, rp := range allRepos {
 		repo := *rp.FullName
 		if strings.Contains(repo, keyword) {
-			fmt.Println(repo)
+			readme, _, err := client.Repositories.GetReadme("intelsdi-x", repo, &github.RepositoryContentGetOptions{})
+			if err != nil {
+				log.Printf("Repositories.GetReadme returned error: %v", err)
+			}
+			fmt.Printf("Found a readme for %v", readme)
+			// look up each repo and say if you find a README
 		}
 	}
 }
