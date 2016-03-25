@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/google/go-github/github"
 	"golang.org/x/oauth2"
 )
+
+const keyword = "snap-plugin"
 
 var (
 	personalAccessToken string
@@ -62,7 +65,10 @@ func main() {
 		opt.ListOptions.Page = resp.NextPage
 	}
 
-	for _, repo := range allRepos {
-		fmt.Println(*repo.FullName)
+	for _, rp := range allRepos {
+		repo := *rp.FullName
+		if strings.Contains(repo, keyword) {
+			fmt.Println(repo)
+		}
 	}
 }
