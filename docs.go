@@ -71,9 +71,11 @@ func main() {
 	}
 
 	for _, rp := range allRepos {
-		repo := *rp.FullName
+		repo := *rp.Name
+		//owner := *rp.Owner.Login
+
 		if strings.Contains(repo, keyword) {
-			readme, _, err := client.Repositories.GetReadme("intelsdi-x", repo, &github.RepositoryContentGetOptions{})
+			readme, _, err := client.Repositories.GetReadme(org, repo, &github.RepositoryContentGetOptions{})
 			if err != nil {
 				log.Printf("Repositories.GetReadme returned error: %v", err)
 			}
