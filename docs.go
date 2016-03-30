@@ -75,10 +75,15 @@ func main() {
 		//owner := *rp.Owner.Login
 
 		if strings.Contains(repo, keyword) {
-			readme, _, err := client.Repositories.GetReadme(org, repo, &github.RepositoryContentGetOptions{})
+			encodedText, _, err := client.Repositories.GetReadme(org, repo, &github.RepositoryContentGetOptions{})
 			if err != nil {
 				log.Printf("Repositories.GetReadme returned error: %v", err)
 			}
+			text, err := encodedText.Decode()
+			if err != nil {
+				log.Printf("Decoding failed: %v", err)
+			}
+			readme := string(text)
 			fmt.Printf("Found a readme for %v", readme)
 			// look up each repo and say if you find a README
 		}
