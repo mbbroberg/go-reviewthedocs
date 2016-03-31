@@ -58,6 +58,9 @@ func main() {
 	}
 	// get all pages of results
 	var allRepos []github.Repository
+
+	// initialize the map of all Readmes
+	readmeLibrary := make(map[string]string)
 	for {
 		repos, resp, err := client.Repositories.ListByOrg(org, opt)
 		if err != nil {
@@ -77,15 +80,25 @@ func main() {
 		if strings.Contains(repo, keyword) {
 			encodedText, _, err := client.Repositories.GetReadme(org, repo, &github.RepositoryContentGetOptions{})
 			if err != nil {
-				log.Printf("Repositories.GetReadme returned error: %v", err)
+				log.Printf("Repositories.GetReadme returned error: %v\n", err)
+			}
+			if encodedText == nil {
+				log.Printf("The returned text from %v is nil. Are you sure it exists?\n", repo)
 			}
 			text, err := encodedText.Decode()
 			if err != nil {
-				log.Printf("Decoding failed: %v", err)
+				log.Printf("Decoding failed: %v\n", err)
 			}
 			readme := string(text)
-			fmt.Printf("Found a readme for %v", readme)
+			fmt.Printf("Found a readme for %v\n", repo)
 			// look up each repo and say if you find a README
+			readmeLibrary[repo] = readme
+
 		}
 	}
+	var i int
+	for range readmeLibrary {
+		i++
+	}
+	fmt.Printf("Number of readmes is: %v\n", i)
 }
