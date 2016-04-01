@@ -96,9 +96,6 @@ func main() {
 
 		}
 	}
-	var i int
-	for range readmeLibrary {
-		i++
-	}
-	fmt.Printf("Number of readmes is: %v\n", i)
+	// work out here will occur after we have all the readmes.
+	parseReadme(&readmeLibrary)
 }
