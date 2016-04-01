@@ -1,10 +1,12 @@
 package main
 
-import "fmt"
+import "strings"
 
-func parseReadme(readmeList *map[string]string) {
-
+func parseReadme(readmeList *map[string]string) (review string) {
+	all := []string{""}
 	for _, readme := range *readmeList {
-		fmt.Printf(readme)
+		strings.Join(all, readme)
 	}
+	review = string(all)
+	return review
 }
