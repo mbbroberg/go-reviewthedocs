@@ -14,8 +14,7 @@ const keyword = "snap-plugin"
 
 var (
 	personalAccessToken string
-	// issuesCollection    allIssues
-	org string
+	org                 string
 )
 
 // TokenSource is an encapsulation of the AccessToken string
