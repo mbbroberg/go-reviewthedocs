@@ -74,9 +74,11 @@ func main() {
 
 	for _, rp := range allRepos {
 		repo := *rp.Name
-		//owner := *rp.Owner.Login
 
+		// Going through a list of all repos for GH_ORG
 		if strings.Contains(repo, keyword) {
+
+			// error handling on retrieval of README.md.
 			encodedText, _, err := client.Repositories.GetReadme(org, repo, &github.RepositoryContentGetOptions{})
 			if err != nil {
 				log.Printf("Repositories.GetReadme returned error: %v\n", err)
@@ -84,17 +86,24 @@ func main() {
 			if encodedText == nil {
 				log.Printf("The returned text from %v is nil. Are you sure it exists?\n", repo)
 			}
+
+			// encoding could have some issues. Let's catch them here.
 			text, err := encodedText.Decode()
 			if err != nil {
 				log.Printf("Decoding failed: %v\n", err)
 			}
-			readme := string(text)
-			fmt.Printf("Found a readme for %v\n", repo)
-			// look up each repo and say if you find a README
-			readmeLibrary[repo] = readme
 
+			// conversion of the decoded file to string
+			readme := string(text)
+			readmeLibrary[repo] = readme
+			fmt.Printf("Found a readme for %v\n", repo)
+
+			// have decoded README.md here.
+
+			// for testing. Just mess with one file for now.
+			break
 		}
 	}
 	// work out here will occur after we have all the readmes.
-	parseReadme(&readmeLibrary)
+	fmt.Println(parseReadme(&readmeLibrary))
 }
