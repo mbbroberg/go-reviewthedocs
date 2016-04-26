@@ -1,40 +1,56 @@
 package main
 
-import (
-	"fmt"
-	"regexp"
-	"strings"
-)
+import "strings"
 
 // Readme shows the required areas of the README.md file that can easily
 // be parsed into a report.
 type Readme struct {
-	Title              bool   // Follow the convention
-	Description        string // Anything
-	GoVersion          bool
-	SystemRequirements string // Does it list privileges? Link to tools?
-	// Installation       string
-	// Example            string
-	// ExampleJSON        string
-	// MetricCatalog      string
-	// Roadmap            string
-	// License            string
-	// Acknowledgement    string // including Authors
-	// BuildStatus        bool   // Should find it somewhere on the file
-	// LicenseEmbedded    bool   // Should find it somewhere on the file
+	Title            string // Follow the convention
+	Description      string // Anything there?
+	GoVersionValue   string
+	CollectedMetrics string // Should find a few but not all if > 20
 }
 
 func parseReadme(readmeList *map[string]string) (review Readme) {
 	for _, readme := range *readmeList {
-		switch {
-		case strings.ContainsAny(readme, "1.5 & 1.6"):
-			review.GoVersion = true
-		default:
-			fmt.Println("Didn't find any supported Go versions")
-		}
+		review.Title = checkTitle(readme)
+		review.Description = checkDescription(readme)
+		review.GoVersionValue = checkGoVersionValue(readme)
+		review.CollectedMetrics = checkCellectedMetrics(readme)
 
-		re, _ := regexp.MatchString("#*plugin*", readme)
-		review.Title = re
 	}
 	return review
+}
+
+func checkTitle(readme string) string {
+	return "This is a title"
+	// re, _ := regexp.MatchString("#*plugin*", readme) << re = bool
+	// review.Title = re
+}
+
+func checkDescription(readme string) string {
+	return "Good for now"
+}
+
+func checkGoVersionValue(readme string) string {
+	versions := []string{}
+	if strings.Contains(readme, "1.4") {
+		versions = append(versions, "1.4")
+	}
+	if strings.Contains(readme, "1.5") {
+		versions = append(versions, "1.5")
+	}
+	if strings.Contains(readme, "1.6") {
+		versions = append(versions, "1.6")
+	}
+	value := strings.Join(versions, "")
+	if value == "" {
+		return "No Go version found"
+	}
+	return value
+
+}
+
+func checkCellectedMetrics(readme string) string {
+	return "Found one."
 }
